@@ -3,6 +3,7 @@
 A Python-based tool that detects multi-step IAM privilege-escalation paths inside an AWS account using Boto3, NetworkX, and Matplotlib.
 The scanner automatically maps all users, roles, policies, and sts:AssumeRole relationships to reveal any hidden escalation chains.
 
+
 -> What this project does
 
 Reads IAM users, roles, and policies from an AWS account
@@ -18,6 +19,54 @@ student-user → LibraryAssistantRole → ... → AdminRole
 Generates a visual graph (PNG) showing the final escalation chain
 
 This helps administrators and security teams identify misconfigurations that allow attackers to escalate privileges.
+
+ 
+ -> How the AWS IAM environment was built for this project
+
+To simulate a realistic cloud security scenario, a multi-step privilege escalation structure was intentionally created inside AWS.
+
+1. Starting identity (low privilege)
+
+student-user
+
+No administrative permissions
+
+Only allowed to assume one basic role at the start of the chain
+
+2. Custom multi-hop IAM roles created
+
+Each role was configured so that the previous identity in the chain could assume it.
+
+The roles created were:
+
+LibraryAssistantRole
+
+CourseAssistantRole
+
+DeptAdminRole
+
+ITSupportRole
+
+SecurityOfficerRole
+
+AdminRole (final admin role with AdministratorAccess)
+
+3. Two things configured for each hop
+
+For every step in the chain:
+
+(A) Trust Policy on the target role
+
+Example: CourseAssistantRole trusts LibraryAssistantRole
+
+This tells AWS which identity is allowed to assume this role
+
+(B) Inline AssumeRole Policy on the caller
+
+Example: LibraryAssistantRole is allowed to assume CourseAssistantRole
+
+This gives the previous role permission to make the switch
+
 
 -> Why this project is useful
 
